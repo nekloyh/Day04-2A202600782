@@ -43,10 +43,15 @@ def build_chat_model(
     if provider == "ollama":
         from langchain_ollama import ChatOllama
 
+        # reasoning=False disables the model's "thinking" channel (qwen3.x) so the
+        # final answer lands in `content` instead of an empty string. Override with
+        # OLLAMA_REASONING=true if a model actually benefits from chain-of-thought.
+        reasoning = os.getenv("OLLAMA_REASONING", "false").strip().lower() in {"1", "true", "yes"}
         return ChatOllama(
-            model=model_name or os.getenv("OLLAMA_MODEL", "qwen3.5:3b"),
+            model=model_name or os.getenv("OLLAMA_MODEL", "qwen3.5:2b"),
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
             temperature=temperature,
+            reasoning=reasoning,
         )
     raise ValueError("This lab supports only the `google` and `ollama` providers.")
 
