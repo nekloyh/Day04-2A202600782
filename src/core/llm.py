@@ -53,7 +53,18 @@ def build_chat_model(
             temperature=temperature,
             reasoning=reasoning,
         )
-    raise ValueError("This lab supports only the `google` and `ollama` providers.")
+    if provider == "openai":
+        from langchain_openai import ChatOpenAI
+
+        # OpenAI-compatible endpoint (e.g. opencode.ai zen). Reads LLM_ENDPOINT /
+        # API_KEY / MODEL so any drop-in compatible gateway works without code edits.
+        return ChatOpenAI(
+            model=model_name or os.getenv("MODEL", "deepseek-v4-flash"),
+            base_url=os.getenv("LLM_ENDPOINT"),
+            api_key=os.getenv("API_KEY"),
+            temperature=temperature,
+        )
+    raise ValueError("This lab supports only the `google`, `ollama`, and `openai` providers.")
 
 
 def extract_json_object(raw: Any) -> dict[str, Any]:
