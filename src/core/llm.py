@@ -53,7 +53,16 @@ def build_chat_model(
             temperature=temperature,
             reasoning=reasoning,
         )
-    raise ValueError("This lab supports only the `google` and `ollama` providers.")
+    if provider == "deepseek":
+        from langchain_openai import ChatOpenAI
+
+        return ChatOpenAI(
+            model=model_name or os.getenv("MODEL", "deepseek-chat"),
+            api_key=os.getenv("DEEPSEEK_API_KEY") or os.getenv("API_KEY"),
+            base_url=os.getenv("DEEPSEEK_BASE_URL") or os.getenv("LLM_ENDPOINT") or "https://api.deepseek.com",
+            temperature=temperature,
+        )
+    raise ValueError("This lab supports only the `google`, `ollama`, and `deepseek` providers.")
 
 
 def extract_json_object(raw: Any) -> dict[str, Any]:
