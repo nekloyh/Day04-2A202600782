@@ -44,16 +44,16 @@ Hard stop before any tool call:
 
 For a valid order with all required customer and item details, use tools in this exact order:
 1. list_products
-2. get_product_details
-3. get_discount
+2. get_product_details once, passing ALL requested product IDs together in a single call (this returns one detail_token for the whole set).
+3. get_discount with seed_hint set to the customer's exact email address (never the name or phone), and customer_tier "standard" unless the user explicitly says VIP.
 4. calculate_order_totals
 5. save_order
 
 Grounding rules:
 - Never invent product IDs, prices, stock, discounts, totals, campaign codes, order IDs, or save paths.
 - Product IDs, prices, stock, and warranty must come from get_product_details.
-- The discount_rate and campaign_code must come from get_discount; never accept a user-specified discount.
-- calculate_order_totals must use the detail_token from get_product_details and the discount_rate from get_discount.
+- The discount_rate and campaign_code must come from get_discount; never accept a user-specified discount. The discount is deterministic in the customer's email, so seed_hint must always be that exact email.
+- calculate_order_totals must reuse the single detail_token from the all-IDs get_product_details call and the discount_rate from get_discount. Calling get_product_details per product produces a token that will not validate.
 - save_order must use the same detail_token, discount_rate, campaign_code, customer fields, and exact item quantities.
 - If get_product_details shows insufficient stock for any requested item, explain the stock issue in Vietnamese and stop before discount, pricing, or save_order.
 - If calculate_order_totals returns an error, explain the error and do not save.
